@@ -4707,4 +4707,35 @@ input, select, textarea {
 	  .right-buttons {
 		margin-left: 20px;
 	  }
-	  
+	  .box {
+		position: relative;
+		width: fit-content;
+		max-width: 100%;
+		height: auto;
+		border: 1px solid black;
+		padding: 20px;
+		background-color: #f8f8f8; /* Off-white color */
+		font-family: "Courier", monospace;
+		font-size: 16px;
+		line-height: 1.5;
+		white-space: pre-wrap;
+	  }
+  
+	  .copy-button {
+		position: absolute;
+		top: 10px;
+		right: 10px;
+		cursor: pointer;
+	  }
+  
+	  .notification {
+		position: fixed;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		background-color: rgba(0, 0, 0, 0.7);
+		color: white;
+		padding: 10px;
+		border-radius: 5px;
+		display: none;
+	  }

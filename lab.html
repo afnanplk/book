@@ -1,0 +1,218 @@
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<title>s6 lab</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+		
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<a href="#tcp" class="logo">Pathaalam</a>
+					</header>
+
+				<!-- Nav -->
+					<nav id="nav">
+						<ul class="links">
+							<li><a href="index.html">home</a></li>
+							<li><a href="SIX.html">S6</a></li>
+						</ul>
+						<ul class="icons">
+							<li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
+							<li><a href="#" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
+							<li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
+							<li><a href="#" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+						</ul>
+					</nav>
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- Post -->
+							<section class="post">
+								<header class="major">
+									<h1>Melcow Guys</h1>
+								</header>
+								<ul class="actions">
+									<li><a href="#tcp" class="button icon solid fa-search">TCP client-server</a></li>
+									<li><a href="#udp" class="button icon solid fa-search">udP client-server</a></li>
+									<!--
+									<li><a href="notes/CGI/Module 3.pdf" class="button icon solid fa-download">M3</a></li>
+									<li><a href="notes/CGI/Module 4.pdf" class="button icon solid fa-download">M4</a></li>
+									<li><a href="notes/CGI/Module 5.pdf" class="button icon solid fa-download">M5</a></li>
+									<li><a href="notes/CGI/cgi.html" class="button icon solid fa-download">SHORT NOTE</a></li>
+									-->
+									
+								  </ul>
+								  <h2 id="tcp">TCP</h2><h4><a href="#">client-server-communication.c (server side)</a></h4>
+								  <div class="box">
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;sys/socket.h&gt;
+#include &lt;arpa/inet.h&gt;
+#define MAX_BUFFER_SIZE 1024
+#define PORT 12345
+int main() {
+    int server_socket, client_socket, read_size;
+    struct sockaddr_in server_addr, client_addr;
+    char buffer[MAX_BUFFER_SIZE];
+    char response[MAX_BUFFER_SIZE] = "Hello, client!";
+    server_socket = socket(AF_INET, SOCK_STREAM, 0);
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons(PORT);
+    bind(server_socket, (struct sockaddr *)&server_addr, sizeof(server_addr))
+    listen(server_socket, 5);
+    printf("Server listening on port %d\n", PORT);
+    int addr_len = sizeof(client_addr);
+    client_socket = accept(server_socket, (struct sockaddr *)&client_addr, (socklen_t *)&addr_len);
+    printf("Client connected\n");
+    read_size = recv(client_socket, buffer, sizeof(buffer), 0);
+    printf("Received data from client: %s\n", buffer);
+    write(client_socket, response, strlen(response));
+    close(client_socket);
+    close(server_socket);
+    return 0;
+}<div class="copy-button button small" onclick="copyText(this.parentNode)">Copy</div>
+								  </div>
+								  <h4><a href="#">client-server-communication.c (client side)</a></h4>
+								  <div class="box">
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;sys/socket.h&gt;
+#include &lt;arpa/inet.h&gt;
+#define MAX_BUFFER_SIZE 1024
+#define SERVER_IP "127.0.0.1"
+#define PORT 12345
+int main() {
+    int client_socket, read_size;
+    struct sockaddr_in server_addr;
+    char buffer[MAX_BUFFER_SIZE];
+    char message[MAX_BUFFER_SIZE] = "Hello, server!";
+    client_socket = socket(AF_INET, SOCK_STREAM, 0);
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = inet_addr(SERVER_IP);
+    server_addr.sin_port = htons(PORT);
+  connect(client_socket, (struct sockaddr *)&server_addr, sizeof(server_addr));
+ send(client_socket, message, strlen(message), 0);
+    read_size = recv(client_socket, buffer, sizeof(buffer), 0);
+printf("Received data from server: %s\n", buffer);
+    close(client_socket);
+    return 0;
+}<div class="copy-button button small" onclick="copyText(this.parentNode)">Copy</div>
+								  </div>
+								
+								  <div class="notification" id="notification">Text copied to clipboard!</div>
+								  <h2 id="udp">udP</h2>
+								  <h4><a href="#">client-server-communication.c (server side)</a></h4>
+								  <div class="box">
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdbool.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;arpa/inet.h&gt;
+#define MAX_BUFFER_SIZE 1024
+#define SERVER_IP "127.0.0.1"
+#define SERVER_PORT 8888
+int main() {
+    int clientSocket;
+    struct sockaddr_in serverAddr;
+    char buffer[MAX_BUFFER_SIZE];
+    clientSocket = socket(AF_INET, SOCK_DGRAM, 0)     
+    memset(&serverAddr, 0, sizeof(serverAddr));
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(SERVER_PORT);    
+    inet_pton(AF_INET, SERVER_IP, &(serverAddr.sin_addr)) 
+        printf("Enter data to send : ");
+        fgets(buffer, MAX_BUFFER_SIZE, stdin);                 
+    sendto(clientSocket, buffer, strlen(buffer), 0, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) ;                
+        printf("Data sent to server.\n");        
+        struct sockaddr_in serverResponseAddr;
+        socklen_t serverResponseAddrLen = sizeof(serverResponseAddr);        
+        ssize_t recvLen = recvfrom(clientSocket, buffer, MAX_BUFFER_SIZE, 0, (struct sockaddr *)&serverResponseAddr, &serverResponseAddrLen);                   
+        printf("Server response: %s\n", buffer);
+    close(clientSocket);    
+    return 0;
+}<div class="copy-button button small" onclick="copyText(this.parentNode)">Copy</div>
+								  </div>
+								
+								  <div class="notification" id="notification">Text copied to clipboard!</div>
+								  <h4><a href="#">client-server-communication.c (client side)</a></h4>
+								  <div class="box">afn<div class="copy-button button small" onclick="copyText(this.parentNode)">Copy</div>
+								  </div>
+								
+								  <div class="notification" id="notification">Text copied to clipboard!</div>
+								  <h4><a href="#">client-server-communication.c (client side)</a></h4>
+								  <div class="box">afn<div class="copy-button button small" onclick="copyText(this.parentNode)">Copy</div>
+								  </div>
+								
+								  <div class="notification" id="notification">Text copied to clipboard!</div>
+								
+								  <script>
+									function copyText(box) {
+									  const copyButton = box.querySelector(".copy-button");
+									  copyButton.innerText = "Copied"; // Change copy button text to "Copied" after copying
+									  copyButton.disabled = true; // Disable the copy button after copying
+									  const text = box.innerText.replace(copyButton.innerText, ""); // Exclude the copy button text
+								
+									  // Create a temporary textarea element
+									  const textarea = document.createElement("textarea");
+									  textarea.value = text;
+									  document.body.appendChild(textarea);
+								
+									  // Copy the text from the textarea
+									  textarea.select();
+									  document.execCommand("copy");
+								
+									  // Remove the temporary textarea
+									  document.body.removeChild(textarea);
+								
+									  showNotification();
+								
+									  setTimeout(hideNotification, 1000);
+									}
+								
+									function showNotification() {
+									  const notification = document.getElementById("notification");
+									  notification.style.display = "block";
+									}
+								
+									function hideNotification() {
+									  const notification = document.getElementById("notification");
+									  notification.style.display = "none";
+									}
+								  </script>
+							</section>
+
+					</div>
+
+
+				<!-- Copyright -->
+					<div id="copyright">
+						<ul><li>&copy; PLK</li></ul>
+					</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
