@@ -44,14 +44,12 @@
 								<ul class="actions">
 									<li><a href="#tcp" class="button icon solid fa-search">TCP client-server</a></li>
 									<li><a href="#udp" class="button icon solid fa-search">udP client-server</a></li>
-									<!--
-									<li><a href="notes/CGI/Module 3.pdf" class="button icon solid fa-download">M3</a></li>
-									<li><a href="notes/CGI/Module 4.pdf" class="button icon solid fa-download">M4</a></li>
-									<li><a href="notes/CGI/Module 5.pdf" class="button icon solid fa-download">M5</a></li>
-									<li><a href="notes/CGI/cgi.html" class="button icon solid fa-download">SHORT NOTE</a></li>
-									-->
-									
-								  </ul>
+									<li><a href="#3" class="button icon solid fa-search">STOP-AND-WAIT</a></li>
+									<li><a href="#4" class="button icon solid fa-search">FTP-FILE-TRANSFER-PROTOCOL</a></li>
+								</ul>
+								<ul class="actions">
+									<li><a href="#5" class="button icon solid fa-search">PARENT-CHILD-COMMUNICATION-USING-FORK</a></li>
+								</ul>
 								  <h2 id="tcp">TCP</h2><h4><a href="#">client-server-communication.c (server side)</a></h4>
 								  <div class="box">
 #include &lt;stdio.h&gt;
@@ -149,14 +147,265 @@ int main() {
 								
 								  <div class="notification" id="notification">Text copied to clipboard!</div>
 								  <h4><a href="#">client-server-communication.c (client side)</a></h4>
-								  <div class="box">afn<div class="copy-button button small" onclick="copyText(this.parentNode)">Copy</div>
+								  <div class="box">
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdbool.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;arpa/inet.h&gt;
+#define MAX_BUFFER_SIZE 1024
+#define SERVER_IP "127.0.0.1"
+#define SERVER_PORT 8888
+int main() {
+    int clientSocket;
+    struct sockaddr_in serverAddr;
+    char buffer[MAX_BUFFER_SIZE];    
+    clientSocket = socket(AF_INET, SOCK_DGRAM, 0);          
+    memset(&serverAddr, 0, sizeof(serverAddr));
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(SERVER_PORT);    
+    inet_pton(AF_INET, SERVER_IP, &(serverAddr.sin_addr));    
+       printf("Enter data to send : ");
+        fgets(buffer, MAX_BUFFER_SIZE, stdin);            
+    sendto(clientSocket, buffer, strlen(buffer), 0, (struct sockaddr *)&serverAddr, sizeof(serverAddr));                   
+        printf("Data sent to server.\n");        
+        struct sockaddr_in serverResponseAddr;
+        socklen_t serverResponseAddrLen = sizeof(serverResponseAddr);        
+        ssize_t recvLen = recvfrom(clientSocket, buffer, MAX_BUFFER_SIZE, 0, (struct sockaddr *)&serverResponseAddr, &serverResponseAddrLen);              
+        printf("Server response: %s\n", buffer);    
+    close(clientSocket);    
+    return 0;
+}
+<div class="copy-button button small" onclick="copyText(this.parentNode)">Copy</div>
 								  </div>
 								
 								  <div class="notification" id="notification">Text copied to clipboard!</div>
-								  <h4><a href="#">client-server-communication.c (client side)</a></h4>
-								  <div class="box">afn<div class="copy-button button small" onclick="copyText(this.parentNode)">Copy</div>
+								  <h2 id="3">stop-and-wait</h2>
+								  <h4><a href="#">stop-and-wait (sender program)</a></h4>
+								  <div class="box">
+#include&lt;stdio.h&gt;
+#include&lt;stdlib.h&gt;
+#include&lt;time.h&gt;
+#define TIMEOUT 3
+#define ACK 1
+#define NACK 0
+int main() {
+    srand(time(NULL));
+    int sequence_number = 0;
+    int expected_ack_number = 0;
+    int received_ack_number = -1;
+    int timeout = 0;
+    clock_t start_time;
+    while (1) {
+        printf("Sending packet %d\n", sequence_number);
+        start_time = clock();
+        timeout = 0;
+        while (1) {
+            if (clock() - start_time >= TIMEOUT)  {
+                printf("Timeout occurred for packet %d\n", sequence_number);
+                timeout = 1;
+                break;
+            }
+            if (received_ack_number == sequence_number) {
+                printf("Acknowledgement received for packet %d\n", sequence_number);
+                expected_ack_number = sequence_number + 1;
+                break;
+            }
+        }
+        if (timeout) {
+            continue;
+        }
+        int corrupt = rand() % 2;
+        if (corrupt) {
+            printf("Sending NACK for packet %d\n", sequence_number);
+            received_ack_number = -1;
+        } else {
+            printf("Sending ACK for packet %d\n", sequence_number);
+            received_ack_number = sequence_number;
+            sequence_number++;
+        }
+        if (sequence_number == 10) {
+            break;
+        }
+    }
+    return 0;
+}
+									<div class="copy-button button small" onclick="copyText(this.parentNode)">Copy</div>
 								  </div>
-								
+
+								  <div class="notification" id="notification">Text copied to clipboard!</div>
+								  <h4><a href="#">stop-and-wait (reciever program)</a></h4>
+								  <div class="box">
+#include&lt;stdio.h&gt;
+#include&lt;stdlib.h&gt;
+#include&lt;time.h&gt;									
+#define TIMEOUT 3 
+#define ACK 1
+#define NACK 0
+int main() {
+srand(time(NULL));
+int expected_sequence_number = 0;
+int received_sequence_number = -1; 
+    int timeout = 0; 
+    clock_t start_time; 
+    while (1) {
+        start_time = clock();
+        timeout = 0;
+        while (1) {
+            if (clock() - start_time >= TIMEOUT ) {
+            printf("Timeout occurred  %d\n", expected_sequence_number);
+                timeout = 1;
+                break;
+            }
+            int receive = rand() % 2;
+            if (receive) {
+                received_sequence_number = rand() % 10;
+                break;
+            }
+        }
+        if (timeout) {
+            continue;
+        }
+        if (received_sequence_number == expected_sequence_number) {
+            printf("Packet %d received\n", expected_sequence_number);
+            expected_sequence_number++;
+        }
+        int corrupt = rand() % 2;
+        if (corrupt) {
+            printf("Sending NACK for packet %d\n", received_sequence_number);
+        } else {
+            printf("Sending ACK for packet %d\n", received_sequence_number);
+        }
+        if (expected_sequence_number == 10) {
+            break;
+        }
+    }
+    return 0;
+}
+									<div class="copy-button button small" onclick="copyText(this.parentNode)">Copy</div>
+								  </div>
+
+								  <div class="notification" id="notification">Text copied to clipboard!</div>
+								  <h2 id="4">FTP-file-transfer-protocol</h2>
+								  <h4><a href="#">(client program)</a></h4>
+								  <div class="box">
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdbool.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;arpa/inet.h&gt;
+#define MAX_BUFFER_SIZE 1024
+#define SERVER_IP "127.0.0.1"
+#define SERVER_PORT 8888
+    char buffer[MAX_BUFFER_SIZE];
+    ssize_t bytesRead;    
+int main() {
+    int clientSocket;
+    struct sockaddr_in serverAddr;
+    char buffer[MAX_BUFFER_SIZE];    
+    clientSocket = socket(AF_INET, SOCK_STREAM, 0);    
+    memset(&serverAddr, 0, sizeof(serverAddr));
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(SERVER_PORT);    
+    inet_pton(AF_INET, SERVER_IP, &(serverAddr.sin_addr));      
+    connect(clientSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr));     
+    printf("Connected to server: %s:%d\n", SERVER_IP, SERVER_PORT);
+    printf("Enter the file name to download: ");
+    fgets(buffer, MAX_BUFFER_SIZE, stdin);       
+    send(clientSocket, buffer, strlen(buffer), 0) ;    
+    FILE *file = fopen("received_file", "wb");       
+    while ((bytesRead = recv(serverSocket, buffer, sizeof(buffer), 0)) > 0) {
+        fwrite(buffer, 1, bytesRead, file);
+    }
+    fclose(file);
+     printf("File received successfully.\n");
+    close(clientSocket);    
+    return 0;
+}
+
+									<div class="copy-button button small" onclick="copyText(this.parentNode)">Copy</div>
+								  </div>
+
+								  <div class="notification" id="notification">Text copied to clipboard!</div>
+								  <h4><a href="#">FTP-file-transfer-protocol (server side program)</a></h4>
+								  <div class="box">
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdbool.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;arpa/inet.h&gt;
+#define MAX_BUFFER_SIZE 1024
+#define SERVER_PORT 8888
+int main() {
+    int serverSocket, clientSocket;
+    struct sockaddr_in serverAddr, clientAddr;
+    socklen_t clientAddrLen = sizeof(clientAddr);
+    char buffer[MAX_BUFFER_SIZE];    
+    serverSocket = socket(AF_INET, SOCK_STREAM, 0);  
+    memset(&serverAddr, 0, sizeof(serverAddr));
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(SERVER_PORT);
+    serverAddr.sin_addr.s_addr = INADDR_ANY;
+    
+    bind(serverSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr));          
+    listen(serverSocket, 1) ;    
+    printf("Server is listening on port %d...\n", SERVER_PORT);
+        while (true) {
+clientSocket = accept(serverSocket, (struct sockaddr *)&clientAddr, &clientAddrLen);                 
+        printf("Client connected ");
+        
+        ssize_t recvLen = recv(clientSocket, buffer, sizeof(buffer), 0);              
+          printf("Received file name from client: %s\n", buffer);
+        FILE *file = fopen(buffer, "rb");        
+    while ((bytesRead = fread(buffer, 1, sizeof(buffer), file))) 
+        send(clientSocket, buffer, bytesRead, 0) ;
+        fclose(file);        
+        printf("File sent to the client.\n");        
+        close(clientSocket);
+    }
+    close(serverSocket);    
+    return 0;
+}
+									<div class="copy-button button small" onclick="copyText(this.parentNode)">Copy</div>
+								  </div>
+
+								  <div class="notification" id="notification">Text copied to clipboard!</div>
+								  <h2 id="5">Parent-child-communication-using-fork.c</h2>
+								  <div class="box">
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;sys/wait.h&gt;
+int main() {
+    int pipefd[2];
+    pid_t pid;
+    char message[] = "Hello, child!";
+    char buffer[20];    
+    pipe(pipefd) ;    
+    pid = fork();
+    if (pid == 0) {
+        close(pipefd[1]);        
+        read(pipefd[0], buffer, sizeof(buffer));        
+        printf("Child received message: %s\n", buffer);        
+        close(pipefd[0]);        
+        exit();
+    } else {
+        close(pipefd[0]);        
+        write(pipefd[1], message, sizeof(message));        
+        close(pipefd[1]);        
+        wait(NULL);        
+        printf("Parent sent message to child.\n");        
+        exit();
+    }    
+    return 0;
+}
+									<div class="copy-button button small" onclick="copyText(this.parentNode)">Copy</div>
+								  </div>
+
 								  <div class="notification" id="notification">Text copied to clipboard!</div>
 								
 								  <script>
